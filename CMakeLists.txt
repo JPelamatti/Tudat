@@ -17,8 +17,8 @@ project( TudatBundle )
 option(USE_CSPICE   "Build CSPICE libary, tudat with SPICE support and example applications." ON)
 option(USE_JSONCPP  "Build JSONCPP library and example applications." OFF)
 option(USE_NRLMSISE "Build NRLMISE-00 library and tudat with NRLMSISE support." OFF)
-option(USE_PAGMO    "Build PaGMO library." OFF)
-option(USE_PYGMO    "Build PaGMO library with Python bindings." OFF)
+option(USE_PAGMO    "Build PaGMO library." ON)
+option(USE_PYGMO    "Build PaGMO library with Python bindings." ON)
 
 # Set root-directory for code to current source directory.
 set(PROJECTROOT "${CMAKE_CURRENT_SOURCE_DIR}/")
@@ -34,7 +34,7 @@ message(STATUS ${PROJECT_SOURCE_DIR})
 # Boost
 #
 # Set the required boost components (for Tudat)
-set(BoostComponents filesystem system thread regex date_time unit_test_framework)
+set(BoostComponents filesystem system thread regex date_time unit_test_framework serialization chrono atomic)
 # Add additional required boost componets for other libraries
 # if these are used.
 if(USE_PAGMO)
