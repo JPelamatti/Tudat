@@ -20,7 +20,7 @@
 #include <pagmo/src/pagmo.h>
 #include <pagmo/src/rng.h>
 
-#include "PaGMOEx/Problems/earthMarsTransfer.h"
+#include "/home/yeargh/tudatBundle/tudatExampleApplications/libraryExamples/PaGMOEx/Problems/earthMarsTransfer.h"
 
 using namespace pagmo;
 using boost::format;

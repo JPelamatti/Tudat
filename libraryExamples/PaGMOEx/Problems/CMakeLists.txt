@@ -10,11 +10,15 @@
 # Set the source files.
 set(MY_PAGMO_PROBLEMS_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/earthMarsTransfer.cpp"
+  #"${CMAKE_CURRENT_SOURCE_DIR}/optimizationtest.cpp"
+
 )
 
 # Set the header files.
 set(MY_PAGMO_PROBLEMS_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/earthMarsTransfer.h"
+#"${CMAKE_CURRENT_SOURCE_DIR}/optimizationtest.h"
+
 )
 
 # Add static libraries, can be used later on outside this application.

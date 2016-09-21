@@ -142,8 +142,43 @@ endif( )
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Problems")
 
+# Set the source files.
+set(PAGMOEX_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/angleCoefficientsComputation.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/penaltyfunction.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/singlePerturbedSatellitePropagator.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/computeanglesvalues.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/setbounds.cpp"
+
+)
+
+# Set the header files.
+set(PAGMOEX_HEADERS
+  "${CMAKE_CURRENT_SOURCE_DIR}/angleCoefficientsComputation.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/penaltyfunction.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/singlePerturbedSatellitePropagator.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/computeanglesvalues.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/setbounds.h"
+
+)
+
+# Add static libraries.
+add_library(optimization_functions STATIC ${PAGMOEX_SOURCES} ${PAGMOEX_HEADERS})
+setup_tudat_library_target(optimization_functions "${SRCROOT}${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Add application.
+add_executable(solarSailingOptimization "${SRCROOT}/optimmain.cpp")
+setup_executable_target(solarSailingOptimization "${SRCROOT}")
+target_link_libraries(solarSailingOptimization
+pthread pagmo my_pagmo_problems tudat_basic_astrodynamics tudat_mission_segments optimization_functions
+tudat_simulation_setup tudat_propagators tudat_aerodynamics tudat_gravitation tudat_mission_segments tudat_electro_magnetism
+tudat_ephemerides tudat_numerical_integrators tudat_reference_frames tudat_basic_astrodynamics tudat_input_output
+tudat_basic_mathematics tudat_propagators tudat_spice_interface cspice ${Boost_LIBRARIES})
+
 # Add application.
 add_executable(example_library_pagmo "${SRCROOT}/main.cpp")
 setup_executable_target(example_library_pagmo "${SRCROOT}")
 target_link_libraries(example_library_pagmo  pthread pagmo my_pagmo_problems
                       tudat_basic_astrodynamics tudat_mission_segments ${Boost_LIBRARIES})
+
+

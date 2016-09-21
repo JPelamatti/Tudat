@@ -25,6 +25,7 @@
 
 #include <Tudat/Astrodynamics/Propagators/dynamicsSimulator.h>
 #include <Tudat/External/SpiceInterface/spiceInterface.h>
+#include </home/yeargh/tudatBundle/tudat/Tudat/External/SpiceInterface/spiceInterface.h>
 #include <Tudat/SimulationSetup/body.h>
 #include <Tudat/SimulationSetup/createBodies.h>
 #include <Tudat/SimulationSetup/createAccelerationModels.h>
@@ -32,11 +33,11 @@
 
 #include <Tudat/Astrodynamics/BasicAstrodynamics/accelerationModel.h>
 
-#include <Tudat/InputOutput/matrixTextFileReader.h>
-
 #include <fstream>
 
-#include <SatellitePropagatorExamples/penaltyfunction.cpp>
+#include </home/yeargh/tudatBundle/tudatExampleApplications/libraryExamples/PaGMOEx/penaltyfunction.h>
+#include </home/yeargh/tudatBundle/tudatExampleApplications/libraryExamples/PaGMOEx/singlePerturbedSatellitePropagator.h>
+
 
 // C++ Standard library
 #include <iostream>
@@ -44,19 +45,20 @@
 // External libraries: Eigen
 #include <Eigen/Core>
 
-#include "SatellitePropagatorExamples/applicationOutput.h"
+//#include "SatellitePropagatorExamples/applicationOutput.h"
 
-//! Execute propagation of orbit of Athos around the Earth.
-//!
-//int main()
 
-double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateInKeplerianElements,
-        aramisInitialStateInKeplerianElements, boost::function< Eigen::Vector2d(  double ) > angleFunction ) // might need 2 const
+
+
+double FFSSSimulation(tudat::basic_mathematics::Vector6d athosInitialStateInKeplerianElements,
+                      tudat::basic_mathematics::Vector6d porthosInitialStateInKeplerianElements,
+        tudat::basic_mathematics::Vector6d aramisInitialStateInKeplerianElements,
+                      boost::function< Eigen::Vector2d( double ) >angleFunctionAthos,
+                      boost::function< Eigen::Vector2d( double ) >angleFunctionPorthos)
 {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////            USING STATEMENTS              //////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     using namespace tudat;
     using namespace simulation_setup;
     using namespace propagators;
@@ -64,12 +66,11 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
     using namespace orbital_element_conversions;
     using namespace basic_mathematics;
     using namespace gravitation;
+    using namespace numerical_integrators;
     using namespace ephemerides;
     using namespace interpolators;
-    using namespace spice_interface;
-    using namespace basic_astrodynamics;
-    using namespace aerodynamics;
-    using namespace input_output;
+    //using namespace basic_astrodynamics;
+    //using namespace input_output;
 
 
 
@@ -92,41 +93,6 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
     const double fixedStepSize = 60.0;
 
     //const unsigned int numberOfTimeSteps = simulationEndEpoch/fixedStepSize;
-
-
-    // Import attitude angles and put them in a matrix
-
-
-   // boost::function< Eigen::Vector2d( const double ) > angleFunction =
-       //    boost::lambda::constant( Eigen::Vector2d::Zero( ) );
-
-    /*const std::string relativePath =
-         "/home/yeargh/tudatBundle/tudatExampleApplications/satellitePropagatorExamples/SatellitePropagatorExamples/angles.dat";
-    Eigen::MatrixXd anglesMatrix = readMatrixFromFile(relativePath);
-
-    std::map< double, Eigen::Vector2d > angleMap;
-    Eigen::Vector2d angles;
-
-    for(unsigned int i = 0 ; i<numberOfTimeSteps ; i++)
-    {
-        angles(0) = anglesMatrix(i,1);
-        angles(1) = anglesMatrix(i,2);
-        angleMap[anglesMatrix(i,0)] = angles;
-    }
-
-    // Create and set interpolator.
-    boost::shared_ptr< OneDimensionalInterpolator< double, Eigen::Vector2d > >
-            createdInterpolator = boost::make_shared< LinearInterpolator
-                < double, Eigen::Vector2d > >( angleMap );
-
-    typedef interpolators::OneDimensionalInterpolator< double, Eigen::Vector2d > LocalInterpolator;
-
-    boost::function< Eigen::Vector2d( const double ) > angleFunction =
-            boost::bind( static_cast< Eigen::Vector2d( LocalInterpolator::* )( const double ) >
-                ( &LocalInterpolator::interpolate ), createdInterpolator, _1 );*/
-
-   /* boost::function< Eigen::Vector2d( const double ) > angleFunction;*/
-
 
 
     // Set number of satellites in constellation.
@@ -171,14 +137,14 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
             "Sun", createRadiationPressureInterface(
             athosRadiationPressureSettings, "Athos", bodyMap ) );
 
-   /*boost::shared_ptr< RadiationPressureInterfaceSettings > porthosRadiationPressureSettings =
+   boost::shared_ptr< RadiationPressureInterfaceSettings > porthosRadiationPressureSettings =
             boost::make_shared< CannonBallRadiationPressureInterfaceSettings >(
-            "Sun", 4.0, 1.0, boost::assign::list_of( "Earth" )( "Moon" ) );
+            "Sun", 25.0, 1.0, boost::assign::list_of( "Earth" )( "Moon" ) );
     bodyMap[ "Porthos" ]->setRadiationPressureInterface(
             "Sun", createRadiationPressureInterface(
             porthosRadiationPressureSettings, "Porthos", bodyMap ) );
 
-    boost::shared_ptr< RadiationPressureInterfaceSettings > aramisRadiationPressureSettings =
+    /*boost::shared_ptr< RadiationPressureInterfaceSettings > aramisRadiationPressureSettings =
             boost::make_shared< CannonBallRadiationPressureInterfaceSettings >(
             "Sun", 4.0, 1.0, boost::assign::list_of( "Earth" )( "Moon" ) );
     bodyMap[ "Aramis" ]->setRadiationPressureInterface(
@@ -197,55 +163,14 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
     //THIS MIGHT NOT BE NECESSARY
     std::cout << bodyMap.at( "Earth" )->getGravityFieldModel( )->getGravitationalParameter( );
 
-/*
-    // Set Keplerian elements for Athos.
-    basic_mathematics::Vector6d athosInitialStateInKeplerianElements;
-    athosInitialStateInKeplerianElements( semiMajorAxisIndex ) = 41732.0E3;
-    athosInitialStateInKeplerianElements( eccentricityIndex ) = 0.0;
-    athosInitialStateInKeplerianElements( inclinationIndex ) =
-            unit_conversions::convertDegreesToRadians( 0.0772 );
-    athosInitialStateInKeplerianElements( argumentOfPeriapsisIndex )
-            = unit_conversions::convertDegreesToRadians( 0.0 );
-    athosInitialStateInKeplerianElements( longitudeOfAscendingNodeIndex )
-            = unit_conversions::convertDegreesToRadians( 11.2171 );
-    athosInitialStateInKeplerianElements( trueAnomalyIndex ) =
-            unit_conversions::convertDegreesToRadians( 302.4355 );*/
-
+    // Satellites initial conditions
     initialConditions.col(0) = convertKeplerianToCartesianElements(
                 athosInitialStateInKeplerianElements, earthGravitationalParameter );
 
 
-
-
-    // Set Keplerian elements for Porthos.
-  /*  Vector6d porthosInitialStateInKeplerianElements;
-    porthosInitialStateInKeplerianElements( semiMajorAxisIndex ) = 41732.0E3;
-    porthosInitialStateInKeplerianElements( eccentricityIndex ) = 0.0;
-    porthosInitialStateInKeplerianElements( inclinationIndex ) =
-            unit_conversions::convertDegreesToRadians( 0.0772 );
-    porthosInitialStateInKeplerianElements( argumentOfPeriapsisIndex )
-            = unit_conversions::convertDegreesToRadians( 0.0 );
-    porthosInitialStateInKeplerianElements( longitudeOfAscendingNodeIndex )
-            = unit_conversions::convertDegreesToRadians(11.2171 );
-    porthosInitialStateInKeplerianElements( trueAnomalyIndex ) =
-            unit_conversions::convertDegreesToRadians( 302.4355 );*/
-
     initialConditions.col(1) = convertKeplerianToCartesianElements(
                 porthosInitialStateInKeplerianElements, earthGravitationalParameter );
 
-
-    // Set Keplerian elements for Aramis.
-   /* Vector6d aramisInitialStateInKeplerianElements;
-    aramisInitialStateInKeplerianElements( semiMajorAxisIndex ) = 41732.0E3;
-    aramisInitialStateInKeplerianElements( eccentricityIndex ) = 0.0;
-    aramisInitialStateInKeplerianElements( inclinationIndex ) =
-            unit_conversions::convertDegreesToRadians( 0.0772 );
-    aramisInitialStateInKeplerianElements( argumentOfPeriapsisIndex )
-            = unit_conversions::convertDegreesToRadians( 0.0 );
-    aramisInitialStateInKeplerianElements( longitudeOfAscendingNodeIndex )
-            = unit_conversions::convertDegreesToRadians( 11.2171 );
-    aramisInitialStateInKeplerianElements( trueAnomalyIndex ) =
-            unit_conversions::convertDegreesToRadians( 302.4355 );*/
 
     initialConditions.col(2) = convertKeplerianToCartesianElements(
                 aramisInitialStateInKeplerianElements, earthGravitationalParameter );
@@ -277,8 +202,8 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
                                                    basic_astrodynamics::central_gravity ) );
     accelerationsOfAthos[ "Moon" ].push_back( boost::make_shared< AccelerationSettings >(
                                                      basic_astrodynamics::central_gravity ) );
-   //accelerationsOfAthos[ "Sun" ].push_back( boost::make_shared< FlatPlateRadiationPressureAccelerationSettings >(
-                      //                        angleFunction ) );
+   accelerationsOfAthos[ "Sun" ].push_back( boost::make_shared< FlatPlateRadiationPressureAccelerationSettings >(
+                                             angleFunctionAthos ) );
 
 
 
@@ -290,8 +215,8 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
                                                    basic_astrodynamics::central_gravity ) );
     accelerationsOfPorthos[ "Moon" ].push_back( boost::make_shared< AccelerationSettings >(
                                                      basic_astrodynamics::central_gravity ) );
-    //accelerationsOfPorthos[ "Sun" ].push_back( boost::make_shared< AccelerationSettings >(
-        //                                           basic_astrodynamics::cannon_ball_radiation_pressure ) );
+    accelerationsOfPorthos[ "Sun" ].push_back( boost::make_shared< FlatPlateRadiationPressureAccelerationSettings >(
+                                              angleFunctionPorthos) );
 
 
 
@@ -390,12 +315,14 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
     // Retrieve numerical solutions for state and dependent variables
     std::map< double, Eigen::Matrix< double, Eigen::Dynamic, 1 > > numericalSolution =
             dynamicsSimulator.getEquationsOfMotionNumericalSolution( );
-    std::map< double, Eigen::VectorXd > dependentVariableSoution =
-            dynamicsSimulator.getDependentVariableHistory( );
+    /*std::map< double, Eigen::VectorXd > dependentVariableSoution =
+            dynamicsSimulator.getDependentVariableHistory( );*/
 
 
     // Computes the value of the penalty function
     double pentaltyValue = PenaltyFunction(numericalSolution);
+    double FitnessFunctionValue = 0; // Must be set proportional to the sum of the second time
+                                    //derivatives of the attitude angles
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,6 +331,7 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
 
 
     // Write perturbed satellite propagation history to file.
+    /*
     input_output::writeDataMapToTextFile( dependentVariableSoution,
                                           "dependentVariables1year.dat",
                                           tudat_applications::getOutputPath( ),
@@ -418,13 +346,10 @@ double FFSSSimulation(athosInitialStateInKeplerianElements,porthosInitialStateIn
                                           "",
                                           std::numeric_limits< double >::digits10,
                                           std::numeric_limits< double >::digits10,
-                                          "," );
-    // Final statement.
-    // The exit code EXIT_SUCCESS indicates that the program was successfully executed.
-    //return EXIT_SUCCESS;
+                                          "," );*/
 
 
 
-    return pentaltyValue;
+    return (pentaltyValue + FitnessFunctionValue);
 }
 

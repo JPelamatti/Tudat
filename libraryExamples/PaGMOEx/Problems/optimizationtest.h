@@ -1,6 +1,7 @@
 #ifndef OPTIMIZATIONTEST_H
 #define OPTIMIZATIONTEST_H
 
+#include <iostream>
 #include <vector>
 
 #include <boost/serialization/map.hpp>
@@ -21,7 +22,7 @@ namespace problem
 
 typedef Eigen::Matrix< double, 6, 1 > StateType;
 
-class __PAGMO_VISIBLE  : public base
+class __PAGMO_VISIBLE SolarSailFormationFlying : public base
 {
   public:
     SolarSailFormationFlying( const std::vector< std::vector< double > > problemBounds );
@@ -30,7 +31,14 @@ class __PAGMO_VISIBLE  : public base
     const std::vector< std::vector< double > > problemBounds_;
 
   protected:
-    void objfun_impl( fitness_vector& f, const decision_vector& xv ) const;
+
+    void objfun_impl( fitness_vector &f, const decision_vector &xv ) const;
+
+    friend class boost::serialization::access;
+    template< class Ar > void serialize( Ar &ar, const unsigned int )
+    {
+        ar & boost::serialization::base_object< base >( *this );
+    }
 
 };
 
@@ -39,15 +47,15 @@ class __PAGMO_VISIBLE  : public base
 } // namespace pagmo
 
 // BOOST_SERIALIZATION_ASSUME_ABSTRACT( pagmo::problem::EarthMarsTransfer );
-namespace boost {
+namespace boost
+{
 
 // Serialization for Eigen vectors and matrices
 template<class Ar, typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
 inline void serialize(
     Ar &ar,
     Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols> & t,
-    const unsigned int file_version
-)
+    const unsigned int file_version )
 {
     for( size_t i = 0; static_cast< unsigned int >( i )< t.size( ); i++ )
         ar & t.data( )[ i ];
@@ -74,7 +82,8 @@ inline void load_construct_data( Ar &ar, pagmo::problem::SolarSailFormationFlyin
     std::vector< std::vector< double > > problemBounds;
     ar >> problemBounds;
     // invoke inplace constructor to initialize instance of my_class
-    ::new( t )pagmo::problem::EarthMarsTransfer( problemBounds );
+    ::new( t )pagmo::problem::SolarSailFormationFlying( problemBounds );
+
 }
 
 } // namespace serialization;

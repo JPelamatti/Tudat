@@ -14,7 +14,7 @@
 #include <Tudat/Astrodynamics/BasicAstrodynamics/convertMeanToEccentricAnomalies.h>
 #include <Tudat/Astrodynamics/MissionSegments/multiRevolutionLambertTargeterIzzo.h>
 
-#include "PaGMOEx/Problems/earthMarsTransfer.h"
+#include "/home/yeargh/tudatBundle/tudatExampleApplications/libraryExamples/PaGMOEx/Problems/earthMarsTransfer.h"
 
 namespace pagmo { namespace problem {
 
@@ -40,6 +40,8 @@ void EarthMarsTransfer::objfun_impl( fitness_vector &f, const decision_vector &x
 
     // Gravitational parameter of the Sun
     double mu = 1.32712440018e+20;
+
+    std::cout << "xv size"<< xv.size();
 
     // Set initial and final position as those of Earth and Mars at
     // departure and arrival respectively.

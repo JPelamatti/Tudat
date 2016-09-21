@@ -20,7 +20,9 @@
 #include <pagmo/src/pagmo.h>
 #include <pagmo/src/rng.h>
 
-#include "SatellitePropagatorExamples/optimizationtest.h"
+#include "/home/yeargh/tudatBundle/tudatExampleApplications/libraryExamples/PaGMOEx/Problems/optimizationtest.h"
+#include "/home/yeargh/tudatBundle/tudatExampleApplications/libraryExamples/PaGMOEx/setbounds.h"
+
 
 using namespace pagmo;
 using boost::format;
@@ -39,13 +41,7 @@ int main( )
 
     // We have two decision variables each with a lower and upper
     // bound, create a vector of vectors that will contain these.
-    std::vector< std::vector< double > > bounds( numberOfParameters, std::vector< double >( 2, 0.0 ) );
-
-    // Bounds for the optimized parameters, 2xn vector
-    bounds[ 0 ][ 0 ] = 2458849.5;
-    bounds[ 1 ][ 0 ] = 2460676.5;
-    bounds[ 0 ][ 1 ] = 200;
-    bounds[ 1 ][ 1 ] = 1000;
+    std::vector< std::vector< double > > bounds = SetBounds();
 
     // Define the problem
     problem::SolarSailFormationFlying prob( bounds );
@@ -59,7 +55,7 @@ int main( )
 
     unsigned int i = 0;
 
-    // For 25 generation optimise the population
+    // For n generation optimise the population
     for( ; i < 25; i++ )
     {
         algo.evolve( pop );
